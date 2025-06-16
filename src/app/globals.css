@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+.my-booked-class {
+  @apply bg-red-500 text-white rounded-full;
+}
