@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  HEALTH
+  EDUCATION
+  PRODUCTIVITY
+  PERSONAL_DEVELOPMENT
+  CREATIVE
+  SOCIAL
+  FINANCE
+  OTHER
+}
+
+enum Color {
+  BLUE
+  GREEN
+  ORANGE
+}
+
+model Habit {
+  id           String   @id @default(uuid())
+  name         String
+  description  String
+  category     Category @default(OTHER)
+  selectedDays Json     @default("[\"Mon\"]")
+  color        Color    @default(BLUE)
+  createdAt    DateTime @default(now())
+}

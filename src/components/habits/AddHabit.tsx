@@ -1,217 +1,136 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  Day,
-  CATEGORY_OPTIONS,
-  COLORS,
-  HabitFormData,
-} from "../../app/lib/habits";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { habitSchema, HabitFormData } from "../../schema";
+import { CATEGORY_OPTIONS, COLORS, COLOR_MAP, DAYS, Days } from "@/lib/habits";
+import { createHabit } from "../../actions";
 
 export default function AddHabit({ onClose }: { onClose: () => void }) {
-  const [formData, setFormData] = useState<HabitFormData>({
-    name: "",
-    description: "",
-    category: null,
-    selectedDays: [],
-    color: "#3B82F6",
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<HabitFormData>({
+    resolver: zodResolver(habitSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      category: "OTHER",
+      selectedDays: ["Mon"],
+      color: "BLUE",
+    },
   });
 
-  const toggleDay = (day: Day) => {
-    setFormData((prev) => {
-      const alreadySelected = prev.selectedDays.includes(day);
-      return {
-        ...prev,
-        selectedDays: alreadySelected
-          ? prev.selectedDays.filter((d) => d !== day)
-          : [...prev.selectedDays, day],
-      };
-    });
+  const selectedDays = watch("selectedDays");
+  const color = watch("color");
+
+  const toggleDay = (day: Days) => {
+    const isSelected = selectedDays.includes(day);
+
+    if (isSelected) {
+      if (selectedDays.length === 1) {
+        alert("You must select at least one day");
+        return;
+      }
+      const updated = selectedDays.filter((d) => d !== day);
+      setValue("selectedDays", updated as [Days, ...Days[]], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    } else {
+      const updated = [...selectedDays, day];
+      setValue("selectedDays", updated as [Days, ...Days[]], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
   };
 
-  const setAllDays = () => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    }));
-  };
+  const onSubmit = async (data: HabitFormData) => {
+    const result = await createHabit(data);
 
-  const setWeekdays = () => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    }));
+    return result.status === "error"
+      ? console.log(result.message)
+      : console.log(result.message);
   };
-
-  const setWeekends = () => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedDays: ["Sat", "Sun"],
-    }));
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "number" ? parseInt(value) || 0 : value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Final form data:", formData);
-  };
-
-  useEffect(() => {
-    console.log("formData updated: ", formData);
-  }, [formData]);
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6 relative">
-        <button
-          className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
-          aria-label="Close modal"
-          onClick={onClose}
-        >
-          ✕
-        </button>
-
-        <h2 className="text-xl font-semibold mb-4">Create New Habit</h2>
-
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-          <label htmlFor="name" className="text-sm font-medium text-gray-700">
-            Habit Name
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="e.g., Drink 8 glasses of water"
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            maxLength={50}
-            required
-          />
-
-          <label
-            htmlFor="description"
-            className="text-sm font-medium text-gray-700"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            placeholder="Why is this habit important to you?"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={formData.description}
-            onChange={handleInputChange}
-            maxLength={200}
-            rows={3}
-          />
-
-          <div className="flex space-x-2">
-            <button
-              type="button"
-              onClick={setAllDays}
-              className="bg-blue-200 text-blue-600 rounded-full text-xs font-medium px-3 py-1"
-            >
-              All Days
-            </button>
-            <button
-              type="button"
-              onClick={setWeekdays}
-              className="bg-green-200 text-green-600 rounded-full text-xs font-medium px-3 py-1"
-            >
-              Weekdays
-            </button>
-            <button
-              type="button"
-              onClick={setWeekends}
-              className="bg-purple-200 text-purple-600 rounded-full text-xs font-medium px-3 py-1"
-            >
-              Weekends
-            </button>
-          </div>
-
-          <div className="grid grid-cols-7 gap-2">
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => {
-              const isSelected = formData.selectedDays.includes(day as Day);
-              return (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => toggleDay(day as Day)}
-                  className={`rounded-xl py-2 font-medium transition duration-300 ${
-                    isSelected
-                      ? "bg-blue-700 text-white"
-                      : "bg-blue-200 text-blue-800 hover:bg-blue-400"
-                  }`}
-                >
-                  {day}
-                </button>
-              );
-            })}
-          </div>
-
-          <label
-            htmlFor="category"
-            className="text-sm font-medium text-gray-700"
-          >
-            Category
-          </label>
-          <select
-            id="category"
-            name="category"
-            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.category || ""}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="" disabled>
-              -- Select a category --
-            </option>
-            {CATEGORY_OPTIONS.map((category, index) => (
-              <option key={index} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-
-          <label className="text-sm font-medium text-gray-700">
-            Color Theme
-          </label>
-          <div className="flex gap-2">
-            {COLORS.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, color }))}
-                className={`w-8 h-8 rounded-full border-2 ${
-                  formData.color === color
-                    ? "border-gray-800"
-                    : "border-gray-300"
-                }`}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
-
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <input
+        {...register("name")}
+        placeholder="Habit name"
+        className="border px-3 py-2 w-full"
+      />
+      {errors.name && <p className="text-red-500">{errors.name.message}</p>}
+      <textarea
+        {...register("description")}
+        placeholder="Description"
+        className="border px-3 py-2 w-full"
+        rows={3}
+      />
+      {errors.description && (
+        <p className="text-red-500">{errors.description.message}</p>
+      )}
+      <select
+        {...register("category")}
+        defaultValue=""
+        className="border px-3 py-2 w-full"
+      >
+        <option value="" disabled>
+          -- Select category --
+        </option>
+        {CATEGORY_OPTIONS.map((cat) => (
+          <option key={cat.value} value={cat.value}>
+            {cat.label}
+          </option>
+        ))}
+      </select>
+      {errors.category && (
+        <p className="text-red-500">{errors.category.message}</p>
+      )}
+      <div className="flex gap-2 flex-wrap">
+        {DAYS.map((day) => (
           <button
-            type="submit"
-            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+            type="button"
+            key={day}
+            onClick={() => toggleDay(day)}
+            className={`px-3 py-1 rounded-full ${
+              selectedDays.includes(day)
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200"
+            }`}
           >
-            Save Habit
+            {day}
           </button>
-        </form>
+        ))}
       </div>
-    </div>
+      {errors.selectedDays && (
+        <p className="text-red-500">{errors.selectedDays.message}</p>
+      )}
+      <div className="flex gap-2">
+        {COLORS.map((c) => (
+          <button
+            type="button"
+            key={c}
+            style={{ backgroundColor: COLOR_MAP[c] }}
+            onClick={() => setValue("color", c)}
+            className={`w-8 h-8 rounded-full border-2 ${
+              c === color ? "border-black" : "border-transparent"
+            }`}
+          />
+        ))}
+      </div>
+      {errors.color && <p className="text-red-500">{errors.color.message}</p>}
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        Save Habit
+      </button>
+    </form>
   );
 }
