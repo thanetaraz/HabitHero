@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import React, { useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import AddHabit from "../components/habits/AddHabit";
+import HabitList from "@/components/habits/HabitList";
 
 const Page = () => {
   const [isToggleHabit, setIsToggleHabit] = useState(false);
@@ -18,21 +19,19 @@ const Page = () => {
 
   return (
     <div className="bg-gray-50 h-screen">
-      <section className="w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <section className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         {isToggleHabit && <AddHabit onClose={() => setIsToggleHabit(false)} />}
-        <div className="text-black flex justify-between">
-          <div className="mt-2">
+        <div className="text-black flex flex-wrap md:flex-nowrap justify-between gap-4">
+          <div className="mt-2 min-w-0 flex-1">
             <h1 className="font-bold text-gray-900">Habit Tracker</h1>
             <p className="text-gray-500 mb-4">
               เปลี่ยนนิสัยเพื่อเป็นคนที่ดีกว่าเดิม
             </p>
-            <div className="flex gap-2">
-              <HabitTag color="green" text="อ่านหนังสือ 30 นาที" />
-              <HabitTag color="purple" text="ออกกำลังกาย" />
-              <HabitTag color="pink" text="ทานผลไม้" />
+            <div className="flex gap-2 flex-wrap">
+              <HabitList />
             </div>
           </div>
-          <div>
+          <div className="shrink-0">
             <button
               type="button"
               className="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex items-center"
@@ -82,16 +81,5 @@ const Page = () => {
     </div>
   );
 };
-
-const HabitTag = ({ color, text }: { color: string; text: string }) => (
-  <button
-    type="button"
-    className="shadow-md flex items-center gap-2 border-2 bg-white border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
-  >
-    <span className={`w-4 h-4 bg-${color}-500 rounded-full`}></span>
-    <span className="text-gray-700">{text}</span>
-    <TrashIcon className="h-4 w-4 text-gray-500" />
-  </button>
-);
 
 export default Page;

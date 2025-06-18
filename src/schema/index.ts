@@ -2,7 +2,7 @@ import { z } from "zod";
 import { COLORS, DAYS, CATEGORY_VALUES } from "@/lib/habits";
 
 
-export const habitSchema = z.object({
+export const habitInputSchema = z.object({
   name: z
     .string()
     .min(1, "Habit name is required")
@@ -20,4 +20,12 @@ export const habitSchema = z.object({
   color: z.enum(COLORS)
   });
 
-export type HabitFormData = z.infer<typeof habitSchema>;
+  export const habitSchema = habitInputSchema.extend({
+    id: z.string().uuid(),
+    createdAt: z.string().or(z.date()),
+  });
+
+
+  
+export type HabitFormData = z.infer<typeof habitInputSchema>; // 👉 ฟอร์มใช้ตัวนี้
+export type HabitFromDB = z.infer<typeof habitSchema>;        // 👉 data จาก backend ใช้ตัวนี้

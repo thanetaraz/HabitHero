@@ -1,12 +1,12 @@
 "use server";
 
 import { db } from "../app/utils/prisma";
-import { habitSchema } from "../schema";
+import { habitInputSchema } from "../schema";
 import { z } from "zod";
 
 
-export async function createHabit(values: z.infer<typeof habitSchema>) {
-  const parsed = habitSchema.parse(values);
+export async function createHabit(values: z.infer<typeof habitInputSchema>) {
+  const parsed = habitInputSchema.parse(values);
   return db.habit.create({ data: parsed });
 }
 export async function getHabits() {

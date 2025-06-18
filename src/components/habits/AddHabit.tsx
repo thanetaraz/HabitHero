@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { habitSchema, HabitFormData } from "../../schema";
+import { habitInputSchema, HabitFormData } from "../../schema";
 import { CATEGORY_OPTIONS, COLORS, COLOR_MAP, DAYS, Days } from "@/lib/habits";
 import Button from "./ui/Button";
 
@@ -15,7 +15,7 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
     watch,
     formState: { errors },
   } = useForm<HabitFormData>({
-    resolver: zodResolver(habitSchema),
+    resolver: zodResolver(habitInputSchema),
     defaultValues: {
       name: "",
       description: "",
