@@ -21,11 +21,12 @@ export async function POST(req: NextRequest) {
   });
   return NextResponse.json({ success: true, habit: newHabit }, { status: 201 });  
   } catch (error) {    
+    console.error(error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }  
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const habits = await db.habit.findMany({ 
       include: { completions: true },
@@ -50,7 +51,7 @@ export async function GET(_req: NextRequest) {
 
     return NextResponse.json(transformedHabits, { status: 200 });
   } catch (error) {
-    console.error("GET habits error:", error);
+    console.error(error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 } 

@@ -11,7 +11,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       const habit = await db.habit.findUnique({ where: {id}});
       if (!habit) return new Response("Not found", { status: 404 });
       return NextResponse.json(habit,{ status:200});  
-  } catch (error) {
+  } catch (err) {
+      console.error(err);
       return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }  
 }
@@ -24,7 +25,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       if (!isHabitVaild) return new Response("Not found", { status: 404 });
       await db.habit.delete({ where: {id}});
       return NextResponse.json({ message: "Habit deleted successfully" }, { status: 200 });
-  } catch (error) {
+  } catch (err) {
+    console.error(err);
       return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }  
 }
