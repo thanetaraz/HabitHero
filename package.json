@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "prisma generate && prisma migrate deploy",    
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npx prisma migrate deploy || [ \"$DATABASE_URL\" = \"prisma+postgres://accelerate.prisma-data.net/?api_key=API_KEY\" ] && next build",
     "start": "next start",
-    "lint": "next lint"
-    
-  },
+    "lint": "next lint",
+    "postinstall": "npx prisma generate --no-engine"
+  }
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.1.1",
