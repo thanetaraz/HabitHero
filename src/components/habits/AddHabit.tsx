@@ -4,7 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { habitInputSchema, HabitFormData } from "../../schema";
-import { CATEGORY_OPTIONS, COLORS, COLOR_MAP, DAYS, Days } from "@/lib/habits";
+import {
+  CATEGORY_OPTIONS,
+  COLORS,
+  TAILWIND_COLOR_MAP,
+  DAYS,
+  Days,
+} from "@/lib/habits";
 import Button from "./ui/Button";
 
 export default function AddHabit({ onClose }: { onClose: () => void }) {
@@ -54,7 +60,7 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
   const onSubmit = async (data: HabitFormData) => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/habit", {
+      const res = await fetch("api/habit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -170,13 +176,15 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
             <div className="flex gap-2">
               {COLORS.map((c) => (
                 <button
-                  type="button"
                   key={c}
-                  style={{ backgroundColor: COLOR_MAP[c] }}
-                  onClick={() => setValue("color", c)}
-                  className={`w-8 h-8 rounded-full border-2 ${
-                    c === color ? "border-black" : "border-transparent"
-                  }`}
+                  type="button"
+                  onClick={() => setValue("color", c, { shouldValidate: true })}
+                  className={`
+            w-8 h-8 rounded-full border-2
+            ${c === color ? "border-black" : "border-transparent"}
+            ${TAILWIND_COLOR_MAP[c].bg}
+          `}
+                  aria-label={`Select color ${c}`}
                 />
               ))}
             </div>

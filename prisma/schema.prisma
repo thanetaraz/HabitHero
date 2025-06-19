@@ -25,14 +25,27 @@ enum Color {
   BLUE
   GREEN
   ORANGE
+  PURPLE
+  RED
 }
 
 model Habit {
-  id           String   @id @default(uuid())
+  id           String            @id @default(uuid())
   name         String
   description  String
-  category     Category @default(OTHER)
-  selectedDays Json     @default("[\"Mon\"]")
-  color        Color    @default(BLUE)
-  createdAt    DateTime @default(now())
+  category     Category          @default(OTHER)
+  selectedDays Json              @default("[\"Mon\"]")
+  color        Color             @default(BLUE)
+  createdAt    DateTime          @default(now())
+  completions  HabitCompletion[]
+}
+
+model HabitCompletion {
+  id      String   @id @default(uuid())
+  date    DateTime
+  habitId String
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
 }

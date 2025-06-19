@@ -1,31 +1,58 @@
-import type { NextRequest } from "next/server";
-import { ZodError } from "zod";
-import { createHabit,getHabits } from "@/actions/index";
+import { NextRequest, NextResponse } from "next/server";
+import {habitInputSchema} from "../../../schema";
+import { db } from "../../utils/prisma";
+import { toZonedTime, format } from "date-fns-tz";
+const TIMEZONE = "Asia/Bangkok";
+
 
 export async function POST(req: NextRequest) {
+  const body: unknown = await req.json();
+  const result = habitInputSchema.safeParse(body);
+  let zodErrors = {};
+  if(!result.success) {
+    result.error.issues.forEach((issue) => {
+      zodErrors = {...zodErrors, [issue.path[0]] : issue.message};
+    });
+    return NextResponse.json({ errors: zodErrors }, { status: 400 });
+  }  
   try {
-    const json = await req.json();
-    const habit = await createHabit(json);
-    return Response.json(habit, { status: 201 });
-
-  } catch (err) {
-    if (err instanceof ZodError) {
-      return Response.json({ error: err.message }, { status: 400 });
-    }
-
-    console.error("createHabit error:", err);
-    return Response.json("Internal Server Error", { status: 500 });
-  }
+    const newHabit = await db.habit.create({
+    data: result.data,
+  });
+  return NextResponse.json({ success: true, habit: newHabit }, { status: 201 });  
+  } catch (error) {    
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  }  
 }
 
 export async function GET(_req: NextRequest) {
   try {
-    const habits = await getHabits();
-    return Response.json(habits, { status: 200 });
+    const habits = await db.habit.findMany({ 
+      include: { completions: true },
+    });
+    
+    const transformedHabits = habits.map(habit => {
+      const transformedCompletions = habit.completions.map(completion => {        
+        const dateInBangkok = toZonedTime(completion.date, TIMEZONE);        
+        const formattedDate = format(dateInBangkok, "yyyy-MM-dd", { timeZone: TIMEZONE });
+
+        return {
+          ...completion,
+          date: formattedDate,
+        };
+      });
+
+      return {
+        ...habit,
+        completions: transformedCompletions,
+      };
+    });
+
+    return NextResponse.json(transformedHabits, { status: 200 });
   } catch (error) {
-    console.error("GET /api/habit error:", error);
-    return Response.json("Internal Server Error", { status: 500 });
+    console.error("GET habits error:", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
-}
+} 
 
 
