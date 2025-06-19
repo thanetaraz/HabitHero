@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {habitInputSchema} from "../../../schema";
-import { db } from "../../utils/prisma";
+import { db } from "../../../lib/prisma";
 import { toZonedTime, format } from "date-fns-tz";
 const TIMEZONE = "Asia/Bangkok";
 

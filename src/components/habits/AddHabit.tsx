@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { habitInputSchema, HabitFormData } from "../../schema";
@@ -75,7 +75,7 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
         return;
       }
       alert("Habit created successfully!");
-      onClose();
+      window.location.reload();
     } catch (err) {
       console.error("fetch error:", err);
       alert("Network error, please check your connection and try again.");
@@ -116,29 +116,30 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
             </button>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <label>Habit name</label>
             <input
               {...register("name")}
-              placeholder="Habit name"
-              className="border px-3 py-2 w-full"
+              placeholder="e.g. Drink 2L of water"
+              className="border px-3 py-2 w-full mt-2"
             />
             {errors.name && (
               <p className="text-red-500">{errors.name.message}</p>
             )}
-
+            <label>Description</label>
             <textarea
               {...register("description")}
-              placeholder="Description"
-              className="border px-3 py-2 w-full"
+              placeholder="Describe why this habit matters or how you’ll do it"
+              className="border px-3 py-2 w-full mt-2"
               rows={3}
             />
             {errors.description && (
               <p className="text-red-500">{errors.description.message}</p>
             )}
-
+            <label>Category</label>
             <select
               {...register("category")}
               defaultValue=""
-              className="border px-3 py-2 w-full"
+              className="border px-3 py-2 w-full mt-2"
             >
               <option value="" disabled>
                 -- Select category --

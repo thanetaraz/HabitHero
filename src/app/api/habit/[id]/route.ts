@@ -1,6 +1,6 @@
 
 import { Prisma } from "@prisma/client";
-import { db } from "../../../utils/prisma";
+import { db } from "../../../../lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import {habitCompletionSchema} from "../../../../schema";
 
