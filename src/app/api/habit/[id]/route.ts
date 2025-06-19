@@ -26,34 +26,39 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       await db.habit.delete({ where: {id}});
       return NextResponse.json({ message: "Habit deleted successfully" }, { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error(err); 
       return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }  
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;  
-  const habit = await db.habit.findUnique({ where: {id}});
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+    
+  const habit = await db.habit.findUnique({ where: { id } });
   if (!habit) {
-    return  NextResponse.json({message: "Habit not found"}, { status: 404 });
+    return NextResponse.json({ message: "Habit not found" }, { status: 404 });
   }
-  try {    
-    const body = await req.json();     
-    const input = {...body,habitId: id};        
+
+  try {
+    const body = await req.json();
+    const input = { ...body, habitId: id };
     const result = habitCompletionSchema.safeParse(input);
-    let zodErrors = {};
-    if(!result.success) {
-    result.error.issues.forEach((issue) => {
-      zodErrors = {...zodErrors, [issue.path[0]] : issue.message};
-      return NextResponse.json(
-      Object.keys(zodErrors).length > 0 ? {errors: zodErrors} : {success: true});
-    });  
-  }         
-    await db.habitCompletion.create({ data: result.data });
+    
+    if (!result.success) {
+      let zodErrors = {};
+      result.error.issues.forEach((issue) => {
+        zodErrors = { ...zodErrors, [issue.path[0]]: issue.message };
+      });
+      return NextResponse.json({ errors: zodErrors }, { status: 400 });
+    }
+    
+    await db.habitCompletion.create({
+      data: result.data
+    });
+
     return NextResponse.json({ success: true }, { status: 201 });
 
-    } catch (err) {        
+  } catch (err) {    
     if (
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
@@ -62,7 +67,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         { error: "Completion for this date already exists" },
         { status: 409 }
       );
-    }    
-    return NextResponse.json("Internal Server Error", { status: 500 });
+    }
+    
+    
+    console.error("Error creating habit completion:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

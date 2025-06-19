@@ -39,7 +39,7 @@ export default function HabitTracker() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-medium text-gray-900 mb-1">
-                Habits
+                HabitHero
               </h1>
               <p className="text-gray-500 text-sm">
                 Track your weekly progress
