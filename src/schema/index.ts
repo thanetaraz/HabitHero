@@ -39,10 +39,13 @@ export const habitCompletionSchema = z.object({
 
 export const habitSchema = habitInputSchema.extend({  
     userId: z.string(),
-    completions: z.array(habitCompletionSchema).optional(),   
+      id: z.string().optional(), // ✅ เพิ่มอันนี้
+
+    
 });
 export const habitCardSchema = habitSchema.extend({  
-    id: z.string(),
+    
+     completions: z.array(habitCompletionSchema).optional(), 
 });
 
 export const signUpSchema = z.object({
@@ -60,5 +63,5 @@ export const signUpSchema = z.object({
 export type FormData = z.infer<typeof signUpSchema>;
 export type HabitFormData = z.infer<typeof habitInputSchema>; 
 export type HabitFromDB = z.infer<typeof habitSchema>; 
-export type HabitCard = z.infer<typeof habitCardSchema>; 
+export type HabitCardDB = z.infer<typeof habitCardSchema>; 
 export type HabitCompletionFromDB = z.infer<typeof habitCompletionSchema>;

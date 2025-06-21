@@ -69,7 +69,7 @@ export default function HabitCard({
             </span>
           </div>
           <button
-            onClick={() => onDelete(habit.id)}
+            onClick={() => habit.id && onDelete(habit.id)}
             className="p-1 text-gray-400 hover:text-red-600 transition-colors duration-200"
           >
             <Trash2 size={14} />
@@ -108,7 +108,9 @@ export default function HabitCard({
                 <button
                   key={day.key}
                   onClick={() =>
-                    canInteract ? onToggleCompletion(habit.id, dayDate) : null
+                    canInteract && habit.id
+                      ? onToggleCompletion(habit.id, dayDate)
+                      : null
                   }
                   disabled={!canInteract}
                   className={`

@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
   }  
   try {
 
-     const userId = result.data.userId;
-    
+    const { name, description, category, selectedDays, color,userId } = result.data;     
+  
     const habitCount = await db.habit.count({
       where: { userId },
     });
@@ -29,9 +29,18 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    console.log("the result is",result.data);
+    
 
     const newHabit = await db.habit.create({
-    data : result.data,    
+    data : {
+      name,
+      description,
+      category,
+      selectedDays,
+      color,
+      userId,      
+    },    
   });
   return NextResponse.json({ success: true, habit: newHabit }, { status: 201 });  
   } catch (error) {    
