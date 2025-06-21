@@ -38,7 +38,10 @@ export const habitCompletionSchema = z.object({
 });
 
 export const habitSchema = habitInputSchema.extend({  
-  userId: z.string(),
+    id: z.string(),
+    userId: z.string(),
+    completions: z.array(habitCompletionSchema).optional(),   
+
   
 });
 

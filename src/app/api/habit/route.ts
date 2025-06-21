@@ -29,9 +29,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    const { id, completions, ...createData } = result.data;
 
     const newHabit = await db.habit.create({
-    data : result.data,    
+    data : createData,    
   });
   return NextResponse.json({ success: true, habit: newHabit }, { status: 201 });  
   } catch (error) {    
