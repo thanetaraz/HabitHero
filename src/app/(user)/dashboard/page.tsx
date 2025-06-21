@@ -11,17 +11,20 @@ import LoadingSpinner from "@/components/habits/ui/LoadingSpinner";
 import Navbar from "@/components/habits/Navbar";
 import { useHabits } from "@/hooks/useHabits";
 import { getWeekStart, getThaiDate } from "@/lib/date";
-import { useSession, signOut } from "next-auth/react";
-import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 
 export default function HabitTracker() {
   const [isToggleHabit, setIsToggleHabit] = useState(false);
+  const { data: session } = useSession();
+  const userId = session?.user?.id ?? "";
+
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
     getWeekStart(getThaiDate())
   );
-
   const { habits, loading, error, toggleHabitCompletion, deleteHabit } =
-    useHabits();
+    useHabits({ userId });
+
+  if (!session?.user) return null;
 
   const getWeekDates = () => {
     const dates = [];
@@ -35,39 +38,10 @@ export default function HabitTracker() {
 
   const weekDates = getWeekDates();
 
-  function Navbar() {
-    const { data: session } = useSession();
-    const [isSigningOut, setIsSigningOut] = useState(false);
-
-    const handleSignOut = async () => {
-      setIsSigningOut(true);
-      await signOut({ callbackUrl: "/sign-in" });
-    };
-
-    if (!session?.user) return null;
-
-    return (
-      <div className="flex gap-4 items-center text-center">
-        <div className="text-sm font-medium text-gray-700">
-          {session.user.email}
-        </div>
-
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleSignOut}
-          disabled={isSigningOut}
-        >
-          {isSigningOut ? "Signing out..." : "Sign Out"}
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <Navbar />
+        <Navbar email={session.user.email ?? ""} />
         <div className="mb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -98,7 +72,12 @@ export default function HabitTracker() {
           </button>
         </div>
 
-        {isToggleHabit && <AddHabit onClose={() => setIsToggleHabit(false)} />}
+        {isToggleHabit && (
+          <AddHabit
+            userId={session?.user.id ? session?.user.id : ""}
+            onClose={() => setIsToggleHabit(false)}
+          />
+        )}
 
         {loading && <LoadingSpinner />}
 
@@ -108,9 +87,9 @@ export default function HabitTracker() {
               <EmptyState />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {habits.map((habit) => (
+                {habits.map((habit, index) => (
                   <HabitCard
-                    key={habit.id}
+                    key={index}
                     habit={habit}
                     weekDates={weekDates}
                     currentWeekStart={currentWeekStart}

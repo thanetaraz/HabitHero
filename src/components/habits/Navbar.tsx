@@ -1,9 +1,8 @@
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-export default function Navbar() {
-  const { data: session } = useSession();
+export default function Navbar({ email }: { email: string }) {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -11,13 +10,9 @@ export default function Navbar() {
     await signOut({ callbackUrl: "/sign-in" });
   };
 
-  if (!session?.user) return null;
-
   return (
     <div className="flex gap-4 items-center text-center">
-      <div className="text-sm font-medium text-gray-700">
-        {session.user.email}
-      </div>
+      <div className="text-sm font-medium text-gray-700">{email}</div>
 
       <Button
         variant="destructive"

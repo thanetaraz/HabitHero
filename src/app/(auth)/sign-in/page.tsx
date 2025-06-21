@@ -11,15 +11,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUpSchema } from "@/schema";
+import { signUpSchema, FormData } from "@/schema";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-
-type FormData = z.infer<typeof signUpSchema>;
 
 export default function SignInForm() {
   const form = useForm<FormData>({
@@ -32,17 +29,13 @@ export default function SignInForm() {
   const onSubmit = async (data: FormData) => {
     try {
       const res = await signIn("credentials", {
-        redirect: false,
         email: data.email,
         password: data.password,
+        redirect: false,
       });
 
       if (res?.error) {
-        const message =
-          res.error === "Configuration"
-            ? "Invalid email or password"
-            : res.error;
-
+        const message = "Invalid email or password";
         setServerError(message);
       } else {
         router.push("/dashboard");

@@ -1,70 +1,57 @@
-import { v4 as uuid } from "uuid";
-import { encode as defaultEncode } from "next-auth/jwt";
-
-import {db} from "@/lib/prisma";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
+import { ZodError } from "zod";
 import Credentials from "next-auth/providers/credentials";
 import { signUpSchema } from "@/schema";
-
-const adapter = PrismaAdapter(db);
+import { db } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter,
-  providers: [    
+  providers: [
     Credentials({
       credentials: {
         email: {},
         password: {},
       },
       authorize: async (credentials) => {
-        const validatedCredentials = signUpSchema.parse(credentials);
-
-        const user = await db.user.findFirst({
-          where: {
-            email: validatedCredentials.email,
-            password: validatedCredentials.password,
-          },
-        });
-
-        if (!user) {
-          throw new Error("Invalid credentials.");
-        }
-
-        return user;
-      },
+        try {
+          const { email, password } = await signUpSchema.parseAsync(credentials);          
+          const user = await db.user.findFirst({
+            where: {
+              email: email,              
+            },
+          });
+          if (!user || !user.password) {
+            throw new Error("Invalid credentials.");
+          }
+          const isPasswordValid = await bcrypt.compare(password, user.password);
+          if (!isPasswordValid) {
+            throw new Error("Invalid credentials.");
+          }          
+          return {
+            id: user.id,
+            email: user.email,            
+          };
+        } catch (error) {
+          if (error instanceof ZodError) {
+            return null;
+          }
+          return null;
+        }        
+      },      
     }),
   ],
-  callbacks: {
-    async jwt({ token, account }) {
-      if (account?.provider === "credentials") {
-        token.credentials = true;
+   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
       }
       return token;
     },
-  },
-  jwt: {
-    encode: async function (params) {
-      if (params.token?.credentials) {
-        const sessionToken = uuid();
-
-        if (!params.token.sub) {
-          throw new Error("No user ID found in token");
-        }
-
-        const createdSession = await adapter?.createSession?.({
-          sessionToken: sessionToken,
-          userId: params.token.sub,
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        });
-
-        if (!createdSession) {
-          throw new Error("Failed to create session");
-        }
-
-        return sessionToken;
+    async session({ session, token }) {
+      if (session.user && typeof token.id === "string") {
+        session.user.id = token.id;
       }
-      return defaultEncode(params);
+      return session;
     },
   },
 });

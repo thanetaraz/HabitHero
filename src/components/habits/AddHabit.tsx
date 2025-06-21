@@ -12,8 +12,16 @@ import {
   Days,
 } from "@/lib/habits";
 import Button from "./ui/Button";
+import { toast } from "sonner";
+import { useRouter } from "next/router";
 
-export default function AddHabit({ onClose }: { onClose: () => void }) {
+export default function AddHabit({
+  onClose,
+  userId,
+}: {
+  onClose: () => void;
+  userId: string;
+}) {
   const {
     register,
     handleSubmit,
@@ -34,6 +42,7 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
   const selectedDays = watch("selectedDays");
   const color = watch("color");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const toggleDay = (day: Days) => {
     const isSelected = selectedDays.includes(day);
@@ -60,12 +69,13 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
   const onSubmit = async (data: HabitFormData) => {
     setIsLoading(true);
     try {
+      const habitData = { ...data, userId };
       const res = await fetch("api/habit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(habitData),
       });
 
       const result = await res.json();
@@ -74,7 +84,7 @@ export default function AddHabit({ onClose }: { onClose: () => void }) {
         alert(result.error || "Something went wrong, please try again.");
         return;
       }
-      alert("Habit created successfully!");
+      toast("Habit created successfully!");
       window.location.reload();
     } catch (err) {
       console.error("fetch error:", err);

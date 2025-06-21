@@ -2,21 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { HabitFromDB } from "../schema";
+import { toast } from "sonner";
 
-export const useHabits = () => {
+export const useHabits = ({userId} : {userId: string}) => {
   const [habits, setHabits] = useState<HabitFromDB[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  console.log(userId);
 
   const fetchHabits = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/habit");
+      const res = await fetch(`/api/habit/${userId}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-      const data: HabitFromDB[] = await res.json();
+      const resData = await res.json();
+      const data: HabitFromDB[] = resData.habits;      
       setHabits(data);
+      
     } catch (err) {
       setError((err as Error).message || "Unknown error");
     } finally {
@@ -38,12 +41,12 @@ export const useHabits = () => {
       const result = await res.json();
       fetchHabits();
       if (!res.ok) {
-        alert(result.error || "Something went wrong, please try again.");
+        toast(result.error || "Something went wrong, please try again.");
         return;
       }
     } catch (err) {
       console.error("fetch error:", err);
-      alert("Network error, please check your connection and try again.");
+      toast("Network error, please check your connection and try again.");
     }
   };
 

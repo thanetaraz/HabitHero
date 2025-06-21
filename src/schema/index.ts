@@ -34,13 +34,12 @@ export const habitInputSchema = z.object({
 
 export const habitCompletionSchema = z.object({
   date: zodIsoDate, 
-  habitId: z.string().uuid(),
+  habitId: z.string(),
 });
 
-export const habitSchema = habitInputSchema.extend({
-  id:z.string().uuid(),
-  createdAt: z.date(),
-  completions: z.array(habitCompletionSchema),
+export const habitSchema = habitInputSchema.extend({  
+  userId: z.string(),
+  
 });
 
 export const signUpSchema = z.object({

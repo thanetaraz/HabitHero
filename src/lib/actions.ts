@@ -2,6 +2,7 @@
 
 import { signUpSchema } from "@/schema";
 import { db } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 type FormData = {
   email: string;
@@ -11,8 +12,10 @@ type FormData = {
 export async function signUp(data: FormData) {
   try {
     const validated = signUpSchema.parse(data);
-
-    // Check if email already exists
+    
+    const hashedPassword = await bcrypt.hash(validated.password, 10);
+    
+    
     const existingUser = await db.user.findUnique({
       where: { email: validated.email },
     });
@@ -24,14 +27,20 @@ export async function signUp(data: FormData) {
       };
     }
 
-    // Save to DB
-    await db.user.create({ data: validated });
+    
+    await db.user.create({
+      data: {
+        email: validated.email,    
+        password: hashedPassword,  
+      },
+    });
 
     return {
       success: true,
       message: "Signed up successfully",
     };
   } catch (error) {
+    console.error("Sign up error:", error);
     return {
       success: false,
       message:

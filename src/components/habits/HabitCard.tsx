@@ -1,9 +1,9 @@
 "use client";
 
 import { Trash2, Check } from "lucide-react";
-import { HabitFromDB } from "../../schema";
-import { TAILWIND_COLOR_MAP, Color, DAYS_DETAIL } from "../../lib/habits";
-import { formatDateKey, getThaiDate } from "../../lib/date";
+import { HabitFromDB } from "@/schema";
+import { TAILWIND_COLOR_MAP, Color, DAYS_DETAIL } from "@/lib/habits";
+import { formatDateKey, getThaiDate } from "@/lib/date";
 
 type HabitCardProps = {
   habit: HabitFromDB;

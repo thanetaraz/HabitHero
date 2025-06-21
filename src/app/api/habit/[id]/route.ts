@@ -4,18 +4,30 @@ import { db } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import {habitCompletionSchema} from "@/schema";
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-      const { id } = await params;
-      const habit = await db.habit.findUnique({ where: {id}});
-      if (!habit) return new Response("Not found", { status: 404 });
-      return NextResponse.json(habit,{ status:200});  
+    const { id } = await params;
+
+      const user = await db.user.findUnique({
+      where: { id },
+      include: {
+        habits: {
+          include: {
+            completions: true,
+          },
+        },
+      },
+    });
+
+    if (!user) return new Response("User not found", { status: 404 });
+
+    return NextResponse.json(user, { status: 200 });
   } catch (err) {
-      console.error(err);
-      return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  }  
+    console.error(err);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  }
 }
+
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }
 ) {

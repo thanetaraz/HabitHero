@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import {habitInputSchema} from "@/schema";
+import {habitSchema} from "@/schema";
 import { db } from "@/lib/prisma";
 import { toZonedTime, format } from "date-fns-tz";
 const TIMEZONE = "Asia/Bangkok";
 
 
 export async function POST(req: NextRequest) {
-  const body: unknown = await req.json();
-  const result = habitInputSchema.safeParse(body);
+  const body: unknown = await req.json();  
+  const result = habitSchema.safeParse(body);
   let zodErrors = {};
   if(!result.success) {
     result.error.issues.forEach((issue) => {
@@ -16,8 +16,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ errors: zodErrors }, { status: 400 });
   }  
   try {
+
+     const userId = result.data.userId;
+    
+    const habitCount = await db.habit.count({
+      where: { userId },
+    });
+
+    if (habitCount >= 10) {
+      return NextResponse.json(
+        { message: "You can only create up to 10 habits" },
+        { status: 400 }
+      );
+    }
+
     const newHabit = await db.habit.create({
-    data: result.data,
+    data : result.data,    
   });
   return NextResponse.json({ success: true, habit: newHabit }, { status: 201 });  
   } catch (error) {    
