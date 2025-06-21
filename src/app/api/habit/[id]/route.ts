@@ -1,8 +1,8 @@
 
 import { Prisma } from "@prisma/client";
-import { db } from "../../../../lib/prisma";
+import { db } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import {habitCompletionSchema} from "../../../../schema";
+import {habitCompletionSchema} from "@/schema";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }
 ) {

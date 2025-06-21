@@ -1,14 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-  output   = "/app/generated/prisma-client"
 }
 
 enum Category {
@@ -28,6 +24,15 @@ enum Color {
   ORANGE
   PURPLE
   RED
+}
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  password String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Habit {
