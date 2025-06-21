@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, FormData } from "@/schema";
@@ -22,12 +24,14 @@ export default function SignInForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(signUpSchema),
   });
-
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     try {
+      setIsLoading(true);
+      setServerError(null); // Clear previous errors
       const res = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -44,6 +48,8 @@ export default function SignInForm() {
       setServerError(
         error instanceof Error ? error.message : "Something went wrong"
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,8 +97,15 @@ export default function SignInForm() {
           <p className="text-sm text-red-500 text-center">{serverError}</p>
         )}
 
-        <Button type="submit" className="w-full">
-          Sign In
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing In...
+            </>
+          ) : (
+            "Sign In"
+          )}
         </Button>
 
         <p className="text-sm text-center text-muted-foreground">

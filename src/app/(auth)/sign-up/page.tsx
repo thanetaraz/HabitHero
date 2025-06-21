@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { signUpSchema } from "@/schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,8 +30,11 @@ export default function SignUpForm() {
 
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
+    setServerError(null);
     const res = await signUp(data);
     if (res.success) {
       toast("Your account has been created successfully.");
@@ -38,6 +42,7 @@ export default function SignUpForm() {
     } else {
       setServerError(res.message);
     }
+    setIsLoading(true);
   };
 
   return (
@@ -80,8 +85,15 @@ export default function SignUpForm() {
           <p className="text-sm text-red-500 text-center">{serverError}</p>
         )}
 
-        <Button type="submit" className="w-full">
-          Sign Up
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing In...
+            </>
+          ) : (
+            "Sign Up"
+          )}
         </Button>
         <p className="text-sm text-center text-muted-foreground">
           Already have an account?{" "}

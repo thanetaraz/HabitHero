@@ -29,10 +29,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const { id, completions, ...createData } = result.data;
 
     const newHabit = await db.habit.create({
-    data : createData,    
+    data : result.data,    
   });
   return NextResponse.json({ success: true, habit: newHabit }, { status: 201 });  
   } catch (error) {    
@@ -40,6 +39,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }  
 }
+
 
 export async function GET() {
   try {
