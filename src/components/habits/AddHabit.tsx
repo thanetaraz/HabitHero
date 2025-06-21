@@ -13,7 +13,6 @@ import {
 } from "@/lib/habits";
 import Button from "./ui/Button";
 import { toast } from "sonner";
-import { useRouter } from "next/router";
 
 export default function AddHabit({
   onClose,
@@ -42,14 +41,13 @@ export default function AddHabit({
   const selectedDays = watch("selectedDays");
   const color = watch("color");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const toggleDay = (day: Days) => {
     const isSelected = selectedDays.includes(day);
 
     if (isSelected) {
       if (selectedDays.length === 1) {
-        alert("You must select at least one day");
+        toast("You must select at least one day");
         return;
       }
       const updated = selectedDays.filter((d) => d !== day);
@@ -81,14 +79,14 @@ export default function AddHabit({
       const result = await res.json();
 
       if (!res.ok) {
-        alert(result.error || "Something went wrong, please try again.");
+        toast(result.error || "Something went wrong, please try again.");
         return;
       }
       toast("Habit created successfully!");
       window.location.reload();
     } catch (err) {
       console.error("fetch error:", err);
-      alert("Network error, please check your connection and try again.");
+      toast("Network error, please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
